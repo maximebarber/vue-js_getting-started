@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,39 +10,106 @@
 <body>
 
     <div id="shopping-list">
-        <h1>{{ header.toLocaleUpperCase() }}</h1>
-        <input type="text" v-model="newItem" placeholder="Add item to shooping list" @keyup.enter="saveItem">
-        <button class="btn btn-primary" @click="saveItem">Add</button>
+
+        <div class="header">
+
+            <h1>{{ header.toLocaleUpperCase() }}</h1>
+            <button v-if="state ==='default'" @click="changeState('edit')" class="btn btn-primary">Add item</button>
+            <button v-else @click="changeState('default')" class="btn btn-cancel">Cancel item</button>
+
+        </div>
+
+        <div v-if="state === 'edit'" class="add-item-form">
+
+            <input type="text" v-model="newItem" placeholder="Add item to shooping list" @keyup.enter="saveItem">
+
+            <!-- Keep track of the number of characters in input  with computed property -->
+            <p>{{ characterCount }}/200</p>
+
+            <button class="btn btn-primary"  :disabled="newItem.length === 0" @click="saveItem">Add</button>
+
+        </div>
+
+        <!-- <a v-bind:href="newItem" target="_blank">Dynamic Link</a> -->
+
         <ul>
-            <li v-for="item in items">{{ item }}</li>
+            <!-- v-for : Loop though item -->
+            <!-- :class : bind classes if true -->
+            <!-- @click : toggle togglePurchased method -->
+            <li v-for="item in reversedItems" :class="[item.purchased ? 'strikeout' : '', item.priority ? 'priority' : '']" @click="togglePurchased(item)">{{ item.label }}</li>
         </ul>
+
+        <p v-if="items.length === 0">Well done ! No more items on shopping list !</p>
+
     </div>
 
     <script src="https://unpkg.com/vue"></script>
 
     <script>
+
         var shoppingList = new Vue
         ({
             el: '#shopping-list',
             data:
             {
+                state: 'default',
                 header: 'shopping list app',
                 items: 
                 [
-                    '1kg flour',
-                    '6 eggs',
-                    'A bag of crisps'
+                    {
+                        label: '1kg flour',
+                        purchased: false,
+                        priority: true,
+                    },
+                    {
+                        label: 'A bag of crisps',
+                        purchased: true,
+                        priority: false,
+                    },
+                    {
+                        label: 'Some spicy hot curry',
+                        purchased: false,
+                        priority: false,
+                    },
                 ],
                 newItem: ''
             },
+            // Change presentation
+            computed: 
+            {
+                characterCount()    
+                {
+                    return this.newItem.length;
+                },
+                reversedItems()
+                {
+                    return this.items.slice(0).reverse();
+                }
+            },
+            // Change data
             methods: 
             {
-                saveItem: function() {
-                    this.items.push(this.newItem);
+                saveItem: function() 
+                {
+                    this.items.push(
+                        {
+                            label: this.newItem,
+                            purchased: false,
+                        },);
                     this.newItem = "";
+                },
+                changeState: function(newState)
+                {
+                    this.state = newState;
+                    this.newItem = "";
+                },
+                togglePurchased: function(item)
+                {
+                    item.purchased = !item.purchased;
                 }
             }
         })
+
     </script>
 </body>
 </html>
